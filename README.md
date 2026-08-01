@@ -1,4 +1,4 @@
-# Astro Starter Kit: Minimal
+# Last updated: 2026-08-01 12:05:43 UTC
 
 ```sh
 npm create astro@latest -- --template minimal
