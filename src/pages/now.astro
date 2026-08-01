@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="now" description="What I'm working on right now.">
+  <a class="back-link" href="/">← all posts</a>
+  <article>
+    <header class="post-header">
+      <h1>now</h1>
+      <div class="meta">last updated 2026-08-01</div>
+    </header>
+    <div class="prose">
+      <p>
+        BCA student (sem 5), from India, aiming at cloud/SRE. This is the live
+        state of the lab:
+      </p>
+      <ul>
+        <li>
+          <strong>VPS (2GB DO droplet)</strong> — Pangolin + CrowdSec public
+          edge, SearXNG, Vaultwarden, it-tools, tailnet-only DNS.
+        </li>
+        <li>
+          <strong>Laptop (tailnet-only)</strong> — Immich, Navidrome.
+        </li>
+        <li>
+          <strong>Recently</strong> — got CrowdSec's in-band WAF working,
+          tuned SearXNG to tolerate a datacenter IP, rewrote the homelab docs.
+        </li>
+        <li>
+          <strong>Next</strong> — internship hunt (sem 6), Terraform on the VPS,
+          blog the whole build.
+        </li>
+      </ul>
+    </div>
+  </article>
+</BaseLayout>
