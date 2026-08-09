@@ -1,6 +1,6 @@
 ---
-title: "Self-hosting Headscale with Headplane: my own private Tailscale"
-description: "I replaced the Tailscale control plane with self-hosted Headscale + Headplane, complete with Google OIDC login, AdGuard DNS and an embedded DERP relay. A full guide, with a Tailscale primer for newcomers."
+title: "Self-hosting Headscale + Headplane"
+description: "Run your own private Tailscale with Headscale and Headplane — a full guide, with a primer for newcomers."
 date: 2026-08-09
 tags: [headscale, tailscale, vpn, selfhosting, homelab]
 ---
