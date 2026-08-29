@@ -8,10 +8,7 @@ tags: [forgejo, git, ci-cd, docker, selfhosting, homelab]
 ## Why self-host a Git forge?
 
 > **Replicate this if:** you have a VPS with Docker + a reverse proxy (see
-> [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline) and
-> [Caddy Proxy Manager](/posts/2026-08-09-crowdsec-and-caddy-proxy-manager)
-> first). Swap `git.debnerd.in` for your own domain. Everything else is
-> copy-paste.
+> [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline) first). Swap `git.debnerd.in` for your own domain. Everything else is copy-paste.
 
 GitHub is great. But I wanted:
 
@@ -20,15 +17,13 @@ GitHub is great. But I wanted:
 - **Friends can register** via Google/GitHub OIDC and push code
 - **CI/CD that actually runs on my infrastructure**, not someone else's
 
-Forgejo is a lightweight, self-hosted Gitea fork. It does everything GitHub
-does — issues, PRs, Actions CI/CD, OIDC, packages — and runs on a single
-Docker Compose stack.
+Forgejo is a lightweight, self-hosted Gitea fork. It does everything GitHub does — issues, PRs, Actions CI/CD, OIDC, packages — and runs on a single Docker Compose stack.
 
 ## Architecture
 
 ```
 Internet → Caddy (TLS) → Forgejo (:3000)
-                         → SSH (:2222)
+                          → SSH (:2222)
 
 Forgejo ←── DinD runner ←── Docker-in-Docker daemon
    │
@@ -183,22 +178,22 @@ When a workflow says `runs-on: ubuntu-latest`, Forgejo pulls
 ## First boot
 
 1. Create `.env`:
-   ```bash
-   echo "POSTGRES_PASSWORD=$(openssl rand -base64 32)" > .env
-   chmod 600 .env
-   ```
+    ```bash
+    echo "POSTGRES_PASSWORD=$(openssl rand -base64 32)" > .env
+    chmod 600 .env
+    ```
 
 2. Start the stack:
-   ```bash
-   docker compose up -d
-   ```
+    ```bash
+    docker compose up -d
+    ```
 
 3. Visit `https://git.debnerd.in` — the first-run wizard creates your admin
-   account and configures the database.
+    account and configures the database.
 
 4. During setup, check:
-   - **Require email confirmation to register** ✅
-   - **Enable email notifications** ✅
+    - **Require email confirmation to register** ✅
+    - **Enable email notifications** ✅
 
 ## Register the runner
 
@@ -207,7 +202,7 @@ After the first-run wizard, the runner needs a registration token.
 1. Go to **Site Administration → Actions → Runners**
 2. Copy the registration token
 3. The runner will auto-connect on next restart (it waits 5 seconds for
-   Forgejo to be ready)
+    Forgejo to be ready)
 
 ## Email setup (Brevo on port 2525)
 
@@ -219,13 +214,13 @@ it — free tier is 300 emails/day, no credit card.
 2. Go to **SMTP & API → SMTP** → create SMTP credentials
 3. In Forgejo, go to **Site Administration → Configuration → SMTP Mailer**
 4. Fill in:
-   - SMTP Server: `smtp-relay.brevo.com`
-   - SMTP Port: `2525`
-   - Authentication: Normal password
-   - Username: (your Brevo SMTP login)
-   - Password: (your Brevo SMTP password)
-   - From Address: `noreply@your-domain.com`
-   - Enable TLS: STARTTLS
+    - SMTP Server: `smtp-relay.brevo.com`
+    - SMTP Port: `2525`
+    - Authentication: Normal password
+    - Username: (your Brevo SMTP login)
+    - Password: (your Brevo SMTP password)
+    - From Address: `noreply@your-domain.com`
+    - Enable TLS: STARTTLS
 
 ### The gotcha: Forgejo tries implicit TLS by default
 
@@ -341,15 +336,15 @@ provider, standard ports should work fine.
 ## What I learned
 
 - Self-hosting a Git forge is simpler than I expected. The hard part isn't
-  the forge — it's the CI/CD runners and email.
+    the forge — it's the CI/CD runners and email.
 - DinD is the right choice for CI isolation, even if it adds a layer of
-  complexity with hostname resolution.
+    complexity with hostname resolution.
 - Email on a datacenter IP is a minefield. Use a relay service (Brevo,
-  Mailgun, Resend) and port 2525 if your provider blocks the standard ones.
+    Mailgun, Resend) and port 2525 if your provider blocks the standard ones.
 - Push mirroring is the bridge between self-hosted primary and public
-  mirror. You don't have to choose one or the other.
+    mirror. You don't have to choose one or the other.
 - Forgejo's setup wizard doesn't set the SMTP protocol correctly. Always
-  verify `PROTOCOL = smtp+starttls` is in the config.
+    verify `PROTOCOL = smtp+starttls` is in the config.
 
 ## Next
 

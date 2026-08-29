@@ -138,5 +138,6 @@ sudo apt upgrade -y             # monthly: install security updates
 ## Next
 
 - Put a reverse proxy in front so you can run many services on one IP →
-  CrowdSec + Caddy Proxy Manager
+- Put a reverse proxy + WAF in front so you can run many services on one IP →
+  [CrowdSec + plain Caddy](/posts/2026-08-09-crowdsec-and-caddy-proxy-manager)
 - Run your own Git forge → Self-hosting Forgejo with CI/CD

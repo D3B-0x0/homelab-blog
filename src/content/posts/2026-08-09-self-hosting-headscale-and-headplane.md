@@ -8,10 +8,7 @@ tags: [headscale, tailscale, vpn, selfhosting, homelab]
 ## Wait, isn't Tailscale already free?
 
 > **Replicate this if:** you have a VPS with Docker + a reverse proxy (see
-> [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline) and
-> [Caddy Proxy Manager](/posts/2026-08-09-crowdsec-and-caddy-proxy-manager)).
-> You'll also want a Google account for OIDC login, or swap it for any OIDC
-> provider. Replace `debnerd.in` with your domain throughout.
+> [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline) first). You'll also want a Google account for OIDC login, or swap it for any OIDC provider. Replace `debnerd.in` with your domain throughout.
 
 For my setup? Mostly. But this project isn't about saving $5/month — it's about
 **who holds the keys to your network**. Tailscale's magic is that it builds a
@@ -82,37 +79,37 @@ blog exists.
 ## My architecture
 
 ```
-                    ┌─────────────────────────────────────────────┐
-                    │                VPS (Debian 13)               │
-                    │                                             │
- Internet ──► Caddy Proxy Manager ──► headscale.debnerd.in:8080   │
-                    │      │                                      │
-                    │      └──────► console.debnerd.in:3050       │
-                    │             (Headplane web UI)              │
-                    │                                             │
-                    │   Headscale (control plane)                 │
-                    │    • SQLite database                        │
-                    │    • Embedded DERP relay (3478/udp)         │
-                    │    • Google OIDC login                      │
-                    │                                             │
-                    │   AdGuard Home (tailnet DNS, 100.99.0.3)    │
-                    └─────────────────────────────────────────────┘
-                                  ▲
-                    ┌─────────────┴─────────────┐
-                    │          tailnet          │
-                    │   (100.99.0.0/24 mesh)    │
-                    │                           │
-                    ▼                           ▼
-              Fedora laptop              iPhone / Android / VPS
-              Immich server              direct WireGuard peer
+                     ┌─────────────────────────────────────────────┐
+                     │                VPS (Debian 13)               │
+                     │                                             │
+            Internet ──► Caddy ──► headscale.debnerd.in:8080   │
+                     │      │                                      │
+                     │      └──────► console.debnerd.in:3050       │
+                     │             (Headplane web UI)              │
+                     │                                             │
+                     │   Headscale (control plane)                 │
+                     │    • SQLite database                        │
+                     │    • Embedded DERP relay (3478/udp)         │
+                     │    • Google OIDC login                      │
+                     │                                             │
+                     │   AdGuard Home (tailnet DNS, 100.99.0.3)    │
+                     └─────────────────────────────────────────────┘
+                                   ▲
+                     ┌─────────────┴─────────────┐
+                     │          tailnet          │
+                     │   (100.99.0.0/24 mesh)    │
+                     │                           │
+                     ▼                           ▼
+               Fedora laptop              iPhone / Android / VPS
+               Immich server              direct WireGuard peer
 ```
 
 Key decisions:
 
 - **Headscale does NOT own public ports** (except 3478/udp for the embedded
-  DERP/STUN). Caddy Proxy Manager terminates TLS and proxies to the container
-  by name over a shared Docker network. This means one reverse proxy + one WAF
-  (CrowdSec) fronts *everything*.
+  DERP/STUN). Caddy terminates TLS and proxies to the container by name over a
+  shared Docker network. This means one reverse proxy + one WAF (CrowdSec)
+  fronts *everything*.
 - **Google OIDC for login** — sign in with Gmail, no separate username/
   password to manage. Access is allowlisted by email, not by domain.
 - **AdGuard Home is the tailnet DNS** — my devices resolve MagicDNS names
@@ -125,8 +122,8 @@ Key decisions:
 - A Linux server (I use a Debian 13 VPS) with Docker + Docker Compose.
 - A domain name with a DNS record pointing at your server. I use two hostnames
   under `debnerd.in`: `headscale.debnerd.in` and `console.debnerd.in`.
-- A reverse proxy in front (Caddy / Caddy Proxy Manager / nginx) to terminate
-  TLS — Headscale itself doesn't handle HTTPS here.
+- A reverse proxy in front (Caddy / nginx) to terminate TLS — Headscale itself
+  doesn't handle HTTPS here.
 - (Optional but recommended) Google Cloud project for OIDC login.
 
 ## Step 1: directory layout
@@ -168,7 +165,7 @@ services:
       - net.ipv4.ip_forward=1
       - net.ipv6.conf.all.forwarding=1
     networks:
-      caddy-proxy-manager_caddy-network:
+      edge-net:
     ports:
       - "3478:3478/udp"
 
@@ -186,10 +183,10 @@ services:
       - ./config:/etc/headscale:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      caddy-proxy-manager_caddy-network:
+      edge-net:
 
 networks:
-  caddy-proxy-manager_caddy-network:
+  edge-net:
     external: true
 ```
 
@@ -201,8 +198,8 @@ Notes:
   headscale container) and mounts headscale's config directory so it can edit
   ACLs / policy.
 - I share an external Docker network with my reverse proxy. If you don't have
-  CPM, replace this with `bridge` + published ports for 8080 and 3050 (and
-  handle TLS however your proxy likes).
+  a custom network, replace this with `bridge` + published ports for 8080 and
+  3050 (and handle TLS however your proxy likes).
 
 ## Step 3: .env (secrets)
 
@@ -343,14 +340,14 @@ silently and confuse you for an hour.
 ## Step 6: Google OIDC setup
 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com) → create
-   a project.
+    a project.
 2. **APIs & Services → OAuth consent screen** → External → add your test users
-   (the emails you put in `allowed_users`).
+    (the emails you put in `allowed_users`).
 3. **Credentials → Create Credentials → OAuth client ID** → Web application.
 4. Authorized redirect URIs — Headscale uses `/oidc/callback`:
-   - `https://headscale.debnerd.in/oidc/callback`
-   - Headplane uses `/admin/api/oidc/callback`:
-   - `https://headscale.debnerd.in/admin/api/oidc/callback`
+    - `https://headscale.debnerd.in/oidc/callback`
+    - Headplane uses `/admin/api/oidc/callback`:
+    - `https://headscale.debnerd.in/admin/api/oidc/callback`
 5. Copy the client ID into both configs and the client secret into `.env`.
 
 ## Step 7: first boot
@@ -500,5 +497,5 @@ My ACL shape: an `admins` group with my email, tagged nodes (`tag:server`,
 
 - Wire up Taildrop (already enabled) for easy file transfers to phones.
 - Explore exit-node routing so a device can use the VPS as an egress.
-- Document the full CrowdSec + Caddy Proxy Manager frontend that terminates
-  TLS for everything on this tailnet.
+- Document the full CrowdSec + Caddy setup that terminates TLS for everything
+  on this tailnet.

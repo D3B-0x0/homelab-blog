@@ -95,7 +95,7 @@ That's it. Every post on this blog is just filling in one of those boxes.
 - **Want to actually build something?** → [Your first VPS: a safe baseline](/posts/2026-08-29-your-first-vps-a-safe-baseline)
 - **Want a Git forge of your own?** → Self-hosting Forgejo with CI/CD
 - **Want your own private VPN?** → Self-hosting Headscale + Headplane
-- **Want to stop getting hacked?** → CrowdSec + Caddy Proxy Manager
+- **Want to stop getting hacked?** → [CrowdSec + plain Caddy](/posts/2026-08-09-crowdsec-and-caddy-proxy-manager)
 
 ## What I learned
 
