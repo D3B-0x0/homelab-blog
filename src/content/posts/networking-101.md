@@ -30,7 +30,7 @@ Not all IPs are reachable from the internet. This matters for self-hosting:
   - `172.16.x.x` to `172.31.x.x` — middle range
 
 Your laptop at home probably has a private IP like `192.168.1.5`. Your VPS has a
-public IP like `168.144.74.119`.
+public IP like `203.0.113.5`.
 
 ## 3. Ports: apartment numbers in a building
 
@@ -62,11 +62,11 @@ router "send traffic on port 443 to this specific device."
 ## 5. DNS: the internet's phone book
 
 DNS (Domain Name System) turns human-readable names like `blog.debnerd.in` into
-IP addresses like `168.144.74.119`.
+IP addresses like `203.0.113.5`.
 
 - You type `blog.debnerd.in` in your browser
 - Your device asks a DNS server: "what's the IP for this name?"
-- The DNS server replies: `168.144.74.119`
+- The DNS server replies: `203.0.113.5`
 - Your device connects to that IP
 
 This is how `blog.debnerd.in` reaches your VPS — even though you never type
@@ -99,8 +99,8 @@ management is automatic — no certbot or manual renewals needed.
 
 When you visit `https://vault.debnerd.in`:
 
-1. DNS resolves `vault.debnerd.in` to your VPS's public IP (`168.144.74.119`)
-2. Your browser connects to `168.144.74.119:443` and starts TLS handshake
+1. DNS resolves `vault.debnerd.in` to your VPS's public IP (`203.0.113.5`)
+2. Your browser connects to `203.0.113.5:443` and starts TLS handshake
 3. Caddy (listening on port 443) decrypts the traffic and sees the hostname
 4. Caddy forwards the request to the Vaultwarden container (e.g. `vaultwarden:80`)
 5. Vaultwarden responds, Caddy re-encrypts, and sends it back to your browser
