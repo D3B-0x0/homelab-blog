@@ -7,6 +7,12 @@ tags: [headscale, tailscale, vpn, selfhosting, homelab]
 
 ## Wait, isn't Tailscale already free?
 
+> **Replicate this if:** you have a VPS with Docker + a reverse proxy (see
+> [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline) and
+> [Caddy Proxy Manager](/posts/2026-08-09-crowdsec-and-caddy-proxy-manager)).
+> You'll also want a Google account for OIDC login, or swap it for any OIDC
+> provider. Replace `debnerd.in` with your domain throughout.
+
 For my setup? Mostly. But this project isn't about saving $5/month — it's about
 **who holds the keys to your network**. Tailscale's magic is that it builds a
 mesh VPN (WireGuard under the hood) where every device talks to every other

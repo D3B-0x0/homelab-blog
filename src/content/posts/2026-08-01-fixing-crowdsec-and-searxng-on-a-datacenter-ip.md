@@ -6,6 +6,11 @@ tags: [crowdsec, searxng, selfhosting]
 
 ## What I worked on
 
+> **Replicate this if:** you already run CrowdSec + a reverse proxy on a VPS
+> (see [Caddy Proxy Manager](/posts/2026-08-09-crowdsec-and-caddy-proxy-manager)).
+> The SearXNG part needs a domain + the proxy; the CrowdSec debugging applies
+> to any CrowdSec install.
+
 The VPS had a bad day after a full stack down/up, and fixing it taught me a
 lot about how the CrowdSec WAF and SearXNG actually work under the hood.
 

@@ -7,6 +7,11 @@ tags: [caddy, crowdsec, reverseproxy, selfhosting]
 
 ## The reverse proxy graveyard
 
+> **Replicate this if:** you have a VPS running Docker with a domain pointed at
+> it (see [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline)).
+> Caddy Proxy Manager replaces your existing proxy — read before you switch,
+> don't run it blind next to NPM/Pangolin.
+
 I have a 2GB DigitalOcean VPS running a handful of public services: SearXNG,
 Vaultwarden, IT-Tools, Headscale, and their admin consoles. Every one of them
 needs HTTPS on port 443, and only one thing can own that port. So I've spent

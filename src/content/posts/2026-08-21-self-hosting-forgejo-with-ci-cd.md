@@ -7,6 +7,12 @@ tags: [forgejo, git, ci-cd, docker, selfhosting, homelab]
 
 ## Why self-host a Git forge?
 
+> **Replicate this if:** you have a VPS with Docker + a reverse proxy (see
+> [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline) and
+> [Caddy Proxy Manager](/posts/2026-08-09-crowdsec-and-caddy-proxy-manager)
+> first). Swap `git.debnerd.in` for your own domain. Everything else is
+> copy-paste.
+
 GitHub is great. But I wanted:
 
 - **Full control** over my code, my data, my CI/CD
