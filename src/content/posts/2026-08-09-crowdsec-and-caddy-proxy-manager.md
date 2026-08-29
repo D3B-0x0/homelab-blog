@@ -192,7 +192,7 @@ packages, systemd), and it's the first one that survived:
 - **Log acquisition** — reads Caddy's container logs through the Docker API:
 
 ```yaml
-# /etc/crowdsec/acquis.d/caddy.yaml  (on the VPS)
+# /etc/crowdsec/acquis.d/setup.caddy.yaml  (on the VPS)
 source: docker
 container_name:
   - caddy
