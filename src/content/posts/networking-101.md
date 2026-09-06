@@ -75,11 +75,11 @@ the IP address directly.
 ## 6. Reverse proxy: the front desk for your server
 
 Only one service can listen on port 443 (HTTPS) per IP. But you want to run
-multiple websites: `vault.debnerd.in`, `searx.debnerd.in`, `git.debnerd.in`.
+multiple websites: `vault.cloud.debnerd.in`, `searx.cloud.debnerd.in`, `git.cloud.debnerd.in`.
 
 A **reverse proxy** solves this:
 - Listens on port 443 for all incoming HTTPS traffic
-- Looks at the hostname (`vault.debnerd.in` vs `searx.debnerd.in`)
+- Looks at the hostname (`vault.cloud.debnerd.in` vs `searx.cloud.debnerd.in`)
 - Forwards the request to the correct backend service
 - Also handles HTTPS certificates automatically (with tools like Caddy)
 
@@ -92,18 +92,18 @@ HTTPS adds TLS (Transport Layer Security) encryption:
 - Uses certificates to verify you're talking to the real server
 - Prevents eavesdropping and tampering
 
-With Caddy and DNS-01 challenges (like I use with Cloudflare), certificate
-management is automatic — no certbot or manual renewals needed.
+With automatic certificate issuance (like Let's Encrypt, which my proxy handles),
+there's no certbot or manual renewals needed.
 
 ## How these concepts fit together
 
-When you visit `https://vault.debnerd.in`:
+When you visit `https://vault.cloud.debnerd.in`:
 
-1. DNS resolves `vault.debnerd.in` to your VPS's public IP (`203.0.113.5`)
+1. DNS resolves `vault.cloud.debnerd.in` to your VPS's public IP (`203.0.113.5`)
 2. Your browser connects to `203.0.113.5:443` and starts TLS handshake
-3. Caddy (listening on port 443) decrypts the traffic and sees the hostname
-4. Caddy forwards the request to the Vaultwarden container (e.g. `vaultwarden:80`)
-5. Vaultwarden responds, Caddy re-encrypts, and sends it back to your browser
+3. The reverse proxy (listening on port 443) decrypts the traffic and sees the hostname
+4. It forwards the request to the Vaultwarden container (e.g. `vaultwarden:80`)
+5. Vaultwarden responds, the proxy re-encrypts, and sends it back to your browser
 
 ## Verify your understanding
 

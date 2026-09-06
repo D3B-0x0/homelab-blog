@@ -89,7 +89,7 @@ enable the firewall, you're locked out — that's why we allowed OpenSSH first.
 
 ## Step 5: install Docker
 
-This is the box-everything-lives-in from the [mental model](/posts/2026-08-29-start-here-the-homelab-mental-model)
+This is the "everything lives in a box" idea from the [mental model](/posts/2026-08-29-start-here-the-homelab-mental-model)
 post.
 
 ```bash
@@ -137,7 +137,6 @@ sudo apt upgrade -y             # monthly: install security updates
 
 ## Next
 
-- Put a reverse proxy in front so you can run many services on one IP →
 - Put a reverse proxy + WAF in front so you can run many services on one IP →
   [CrowdSec + plain Caddy](/posts/2026-08-09-crowdsec-and-caddy-proxy-manager)
 - Run your own Git forge → Self-hosting Forgejo with CI/CD

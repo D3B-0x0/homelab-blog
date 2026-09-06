@@ -40,8 +40,8 @@ ignore each other. This is why every guide here uses Docker.
 
 Only one thing can answer on the web's front door (port 443, HTTPS). But you
 have 10 services. A **reverse proxy** is the receptionist: "request for
-vault.debnerd.in? Send it to the Vaultwarden lunchbox. Request for
-searx.debnerd.in? Send it to SearXNG." It also handles HTTPS certificates for
+vault.cloud.debnerd.in? Send it to the Vaultwarden lunchbox. Request for
+searx.cloud.debnerd.in? Send it to SearXNG." It also handles HTTPS certificates for
 you. (Caddy and Nginx are the common ones.)
 
 ## 5. DNS is the phone book of the internet
@@ -93,8 +93,8 @@ That's it. Every post on this blog is just filling in one of those boxes.
 ## Where to go next
 
 - **Want to actually build something?** → [Your first VPS: a safe baseline](/posts/2026-08-29-your-first-vps-a-safe-baseline)
-- **Want a Git forge of your own?** → Self-hosting Forgejo with CI/CD
-- **Want your own private VPN?** → Self-hosting Headscale + Headplane
+- **Want a Git forge of your own?** → [Self-hosting Forgejo with CI/CD](/posts/2026-08-21-self-hosting-forgejo-with-ci-cd)
+- **Want your own private VPN?** → [Self-hosting Headscale + Headplane](/posts/2026-08-09-self-hosting-headscale-and-headplane)
 - **Want to stop getting hacked?** → [CrowdSec + plain Caddy](/posts/2026-08-09-crowdsec-and-caddy-proxy-manager)
 
 ## What I learned

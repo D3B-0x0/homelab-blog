@@ -1,6 +1,6 @@
 ---
 title: "Self-hosting Forgejo with CI/CD"
-description: "A complete guide to deploying Forgejo with Docker-in-Docker Actions runners, OIDC login, and email — including every gotcha I hit."
+description: "A complete guide to deploying Forgejo with Docker-in-Docker Actions runners, OIDC login, and email — including every pitfall I hit."
 date: 2026-08-21
 tags: [forgejo, git, ci-cd, docker, selfhosting, homelab]
 ---
@@ -8,7 +8,7 @@ tags: [forgejo, git, ci-cd, docker, selfhosting, homelab]
 ## Why self-host a Git forge?
 
 > **Replicate this if:** you have a VPS with Docker + a reverse proxy (see
-> [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline) first). Swap `git.debnerd.in` for your own domain. Everything else is copy-paste.
+> [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline) first). Swap `git.cloud.debnerd.in` for your own domain. Everything else is copy-paste.
 
 GitHub is great. But I wanted:
 
@@ -22,12 +22,12 @@ Forgejo is a lightweight, self-hosted Gitea fork. It does everything GitHub does
 ## Architecture
 
 ```
-Internet → Caddy (TLS) → Forgejo (:3000)
+Internet → Pangolin/Traefik (TLS) → Forgejo (:3000)
                           → SSH (:2222)
 
 Forgejo ←── DinD runner ←── Docker-in-Docker daemon
    │
-   └── PostgreSQL (edge-net only)
+   └── PostgreSQL (pangolin_frontend only)
 ```
 
 Key decision: **Docker-in-Docker (DinD)** for CI/CD, not host Docker socket.
@@ -39,7 +39,7 @@ data. The tradeoff is that CI containers can't resolve internal hostnames
 
 - A Linux server with Docker + Docker Compose
 - A domain name with a DNS record pointing at your server
-- A reverse proxy in front (Caddy / nginx) to terminate TLS
+- A reverse proxy in front (Pangolin, Caddy, nginx) to terminate TLS
 - (Optional) Google/GitHub OAuth apps for OIDC login
 - (Optional) Brevo account for email (free 300/day)
 
@@ -76,21 +76,21 @@ services:
       - FORGEJO__database__NAME=forgejo
       - FORGEJO__database__USER=forgejo
       - FORGEJO__database__PASSWD=${POSTGRES_PASSWORD}
-      - FORGEJO__server__ROOT_URL=https://git.debnerd.in
+      - FORGEJO__server__ROOT_URL=https://git.cloud.debnerd.in
       - FORGEJO__server__HTTP_PORT=3000
-      - FORGEJO__server__DOMAIN=git.debnerd.in
-      - FORGEJO__server__SSH_DOMAIN=git.debnerd.in
+      - FORGEJO__server__DOMAIN=git.cloud.debnerd.in
+      - FORGEJO__server__SSH_DOMAIN=git.cloud.debnerd.in
       - FORGEJO__server__SSH_LISTEN_PORT=22
       - FORGEJO__server__SSH_PORT=2222
       # OIDC
-      - FORGEJO__openid__ENABLE_OPENID_SIGNIN=true
-      - FORGEJO__openid__ENABLE_OPENID_SIGNUP=true
+      - FORGEJO__openid__ENABLE_OPENID_SIGNIN=false
+      - FORGEJO__openid__ENABLE_OPENID_SIGNUP=false
     volumes:
       - ./data:/data
     ports:
       - "2222:22"
     networks:
-      edge-net:
+      pangolin_frontend:
 
   db:
     container_name: forgejo-db
@@ -103,7 +103,7 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     networks:
-      edge-net:
+      pangolin_frontend:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U forgejo"]
       interval: 10s
@@ -117,7 +117,7 @@ services:
     restart: unless-stopped
     command: ["dockerd", "-H", "tcp://0.0.0.0:2375", "--tls=false"]
     networks:
-      edge-net:
+      pangolin_frontend:
 
   runner:
     container_name: forgejo-runner
@@ -134,11 +134,11 @@ services:
       - ./runner-data:/data
       - ./runner-config.yml:/config.yml:ro
     networks:
-      edge-net:
+      pangolin_frontend:
     command: '/bin/sh -c "sleep 5; forgejo-runner daemon --config /config.yml"'
 
 networks:
-  edge-net:
+  pangolin_frontend:
     external: true
 ```
 
@@ -164,11 +164,11 @@ cache:
   enabled: true
 
 # DinD: CI containers run inside dockerd, can't resolve internal hostnames.
-# Server URL must be the public address so git clones go through Caddy.
+# Server URL must be the public address so git clones go through the proxy.
 server:
   connections:
-    git.debnerd.in:
-      url: https://git.debnerd.in
+    git.cloud.debnerd.in:
+      url: https://git.cloud.debnerd.in
 ```
 
 The runner labels map GitHub Actions runner names to actual Docker images.
@@ -188,7 +188,7 @@ When a workflow says `runs-on: ubuntu-latest`, Forgejo pulls
     docker compose up -d
     ```
 
-3. Visit `https://git.debnerd.in` — the first-run wizard creates your admin
+3. Visit `https://git.cloud.debnerd.in` — the first-run wizard creates your admin
     account and configures the database.
 
 4. During setup, check:
@@ -206,7 +206,7 @@ After the first-run wizard, the runner needs a registration token.
 
 ## Email setup (Brevo on port 2525)
 
-I use DigitalOcean, which blocks outbound SMTP on ports 25, 587, and 465.
+I use a VPS provider that blocks outbound SMTP on ports 25, 587, and 465.
 Port 2525 is the only one that works. Brevo (formerly Sendinblue) supports
 it — free tier is 300 emails/day, no credit card.
 
@@ -222,7 +222,7 @@ it — free tier is 300 emails/day, no credit card.
     - From Address: `noreply@your-domain.com`
     - Enable TLS: STARTTLS
 
-### The gotcha: Forgejo tries implicit TLS by default
+### Pitfall: Forgejo tries implicit TLS by default
 
 After saving, test by clicking **Forgot Password** on the login page. If you
 get this error in the logs:
@@ -270,14 +270,14 @@ In Forgejo: **Site Administration → Authentication → Add Authentication Sour
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
 2. Create a project → **APIs & Services → OAuth consent screen** → External
 3. **Credentials → Create OAuth client ID** → Web application
-4. Authorized redirect URI: `https://git.debnerd.in/user/oauth2/callback`
+4. Authorized redirect URI: `https://git.cloud.debnerd.in/user/oauth2/callback`
 5. Copy Client ID + Secret into Forgejo
 
 ### GitHub OAuth
 
 1. Go to [github.com/settings/developers](https://github.com/settings/developers)
 2. **New OAuth App**
-3. Authorization callback URL: `https://git.debnerd.in/user/oauth2/callback`
+3. Authorization callback URL: `https://git.cloud.debnerd.in/user/oauth2/callback`
 4. Copy Client ID + Client Secret into Forgejo
 
 ## Push mirroring to GitHub
@@ -297,14 +297,14 @@ Per-repo: **Settings → Packages and Mirrors → Mirror Repository**
 Now: push to Forgejo → auto-mirrors to GitHub → GitHub Actions runs → Pages
 deploys. Everything just works.
 
-## Gotchas
+## Pitfalls
 
 ### 1. DinD can't resolve internal hostnames
 
 CI containers run inside Docker-in-Docker, which has its own network
 namespace. They can't reach `forgejo`, `db`, or any other container by name.
 That's why `runner-config.yml` uses the public URL — git clones go through
-Caddy (public DNS) and it works fine.
+the reverse proxy (public DNS) and it works fine.
 
 ### 2. Runner data directory permissions
 
@@ -327,10 +327,10 @@ calls. Either use the web UI for everything, or create an API token through
 Unlike GitHub, Forgejo doesn't let you push to a non-existent repo and have
 it auto-create. You must create repos through the web UI first, then push.
 
-### 5. DO blocks SMTP ports
+### 5. Providers may block SMTP ports
 
-DigitalOcean blocks outbound TCP on ports 25, 587, and 465. Only port 2525
-works. This is a DO thing, not a Forgejo thing. If you're on a different
+Some VPS providers block outbound TCP on ports 25, 587, and 465. Only port 2525
+works on mine. This is a provider thing, not a Forgejo thing. If you're on a different
 provider, standard ports should work fine.
 
 ## What I learned

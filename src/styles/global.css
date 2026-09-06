@@ -1,5 +1,5 @@
 :root {
-  /* catppuccin mocha */
+  /* catppuccin mocha (default dark) */
   --ctp-base: #1e1e2e;
   --ctp-mantle: #181825;
   --ctp-crust: #11111b;
@@ -15,6 +15,27 @@
   --ctp-red: #f38ba8;
   --ctp-mauve: #cba6f7;
   --ctp-yellow: #f9e2af;
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  /* catppuccin latte */
+  --ctp-base: #eff1f5;
+  --ctp-mantle: #e6e9ef;
+  --ctp-crust: #dce0e8;
+  --ctp-surface0: #ccd0da;
+  --ctp-surface1: #bcc0cc;
+  --ctp-text: #4c4f69;
+  --ctp-subtext0: #6c6f85;
+  --ctp-subtext1: #5c5f77;
+  --ctp-blue: #1e66f5;
+  --ctp-lavender: #7287fd;
+  --ctp-green: #40a02b;
+  --ctp-peach: #fe640b;
+  --ctp-red: #d20f39;
+  --ctp-mauve: #8839ef;
+  --ctp-yellow: #df8e1d;
+  color-scheme: light;
 }
 
 * {
@@ -34,8 +55,8 @@ code,
 kbd,
 pre,
 samp {
-  font-family: "JetBrains Mono", "Fira Code", ui-monospace, "Cascadia Mono",
-    "SF Mono", Menlo, Consolas, monospace;
+  font-family: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace,
+    "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
 }
 
 body {
@@ -71,12 +92,40 @@ a:hover {
   display: flex;
   gap: 1.25rem;
   font-size: 0.95rem;
+  align-items: center;
 }
 .site-header nav a {
   color: var(--ctp-subtext0);
 }
 .site-header nav a:hover {
   color: var(--ctp-lavender);
+}
+
+/* theme toggle: shows moon in dark, sun in light */
+#theme-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ctp-subtext0);
+  display: inline-flex;
+  align-items: center;
+}
+#theme-toggle:hover {
+  color: var(--ctp-lavender);
+}
+#theme-toggle svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+#theme-toggle .sun {
+  display: none;
+}
+html[data-theme="light"] #theme-toggle .sun {
+  display: inline;
+}
+html[data-theme="light"] #theme-toggle .moon {
+  display: none;
 }
 
 .content {

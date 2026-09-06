@@ -1,6 +1,6 @@
 ---
 title: "Docker 101 for self-hosters"
-description: "Docker for self-hosters: what a container/image is, docker compose, volumes, networks, why we use it. Include a tiny copy-paste 'run your first container' example (nginx hello-world)."
+description: "Docker for self-hosters: images vs containers, compose, volumes, networks — plus a copy-paste run-your-first-container example."
 date: 2026-08-29
 tags: [beginner, docker, concepts]
 ---
@@ -39,7 +39,7 @@ gone. Volumes let you persist data:
 - Config files you edit
 - Uploaded media (photos, documents)
 
-In compose: `volumes: ./mydata:/data` mounts host folder `./mydata` into
+In compose, `- ./mydata:/data` mounts host folder `./mydata` into
 container path `/data`.
 
 ### Networks: how containers talk
@@ -47,7 +47,7 @@ container path `/data`.
 By default, containers can talk to each other on a Docker network. You create
 private networks so only specific containers can communicate:
 
-- `edge-net`: my public-facing network (Caddy ↔ backend services)
+- `pangolin_frontend`: my public-facing network (Traefik ↔ backend services)
 - Internal networks: for databases that shouldn't be reached directly
 
 ### Ports: exposing containers to the world
@@ -95,11 +95,11 @@ What happened:
 
 Every service in my homelab runs in its own container:
 
-- `caddy`: reverse proxy (ports 80/443 mapped to host)
-- `searxng-core`: search engine (only reachable by Caddy on edge-net)
-- `vaultwarden`: password manager (only reachable by Caddy)
-- `forgejo`: Git forge (SSH port 2222 mapped, web via Caddy)
-- `headscale`: VPN control plane (only reachable by Caddy)
+- `traefik`: reverse proxy (ports 80/443 mapped to host)
+- `searxng-core`: search engine (only reachable via the proxy network)
+- `vaultwarden`: password manager (only reachable via the proxy)
+- `forgejo`: Git forge (SSH port 2222 mapped, web via the proxy)
+- `pocket-id`: identity provider (only reachable via the proxy)
 - `postgres`: databases (only reachable by their apps on shared networks)
 
 Each container:

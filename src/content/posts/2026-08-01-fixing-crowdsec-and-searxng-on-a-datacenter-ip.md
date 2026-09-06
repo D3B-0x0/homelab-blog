@@ -41,7 +41,7 @@ Probing the WAF **from the VPS host** made CrowdSec ban the VPS's *own IPv6*. Th
 cscli decisions delete --id 441397
 ```
 
-Two gotchas here:
+Two pitfalls here:
 - `-i` parses the argument as an IP, not an ID. Use `--id <n>` to delete by ID.
 - The bouncer caches decisions for ~15s, so the 403s don't stop instantly. Wait ~16s after deleting before retesting.
 

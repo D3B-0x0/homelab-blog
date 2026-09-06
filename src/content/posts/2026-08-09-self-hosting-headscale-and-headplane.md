@@ -17,6 +17,11 @@ device directly, with no central server in the data path. But the *control
 plane* — the part that authenticates devices and decides who can talk to whom —
 is a third-party SaaS by default.
 
+> **Update (Sep 2026):** I've since moved my network to Tailscale's cloud
+> control plane (one less thing to maintain) — so treat this post as a
+> historical build log, not my live setup. The concepts (control vs data plane,
+> OIDC allowlists, expiry footguns) all still apply.
+
 I got tired of relying on that third party for a network that carries my
 photos, my VPS, my phones and my family's devices. So I self-hosted the control
 plane with **Headscale**, and put **Headplane** in front of it for a web UI.
@@ -130,7 +135,7 @@ Key decisions:
 
 Headscale and Headplane share a directory. Critical detail I learned the hard
 way: **the compose file uses relative paths, so always run `docker compose`
-from this exact directory** — I'll come back to that in the gotchas.
+from this exact directory** — I'll come back to that in the pitfalls below.
 
 ```
 Headscale/
@@ -294,8 +299,8 @@ Decisions worth explaining:
   anything else can reach the host. Loopback + the docker socket mount is how
   headplane talks to it.
 - **`node.expiry: 0`** — new nodes never expire. Default is 180 days; I found
-  expiry biting me exactly when a device was least convenient. See gotchas for
-  the per-node command.
+expiry biting me exactly when a device was least convenient. See Pitfall 4 for
+the per-node command.
 - **`verify_clients: true`** on the embedded DERP — only authenticated clients
   get relay service. Raw STUN probes time out by design.
 - **`allowed_users` allowlist** — the OIDC *only* lets these exact emails in.
@@ -400,7 +405,7 @@ means my Immich server is `immich.ts.debnerd.in`, resolving to `100.99.0.5`.
 The `nameservers.global` list is what clients use to resolve *everything else*.
 My first entry is my own **AdGuard Home** on the tailnet — so every device
 gets ad-blocking DNS with zero client config. The rest are Cloudflare DoH
-fallbacks. One gotcha: your nameserver must be reachable on the tailnet, and
+fallbacks. One pitfall: your nameserver must be reachable on the tailnet, and
 if you use ACLs, the clients need a rule that allows them to reach the DNS
 server.
 
@@ -410,7 +415,7 @@ server.
 breakage than through success, so let me save you the pain. The two things
 that bit me hardest:
 
-### Gotcha 1: the crash-loop from a wrong working directory
+### Pitfall 1: the crash-loop from a wrong working directory
 
 ```
 docker compose up -d
@@ -426,7 +431,7 @@ mounts.
 
 **Rule: always `docker compose` from `~/Headscale/`.**
 
-### Gotcha 2: distroless containers
+### Pitfall 2: distroless containers
 
 Headscale and Headplane containers have **no shell**. No `sh`, no `grep`, no
 `sed`. Want to inspect config? `docker exec headscale headscale --help` works
@@ -437,15 +442,15 @@ Use the host's tools against the mounted directories instead:
 grep expiry /home/ghostvps/Headscale/config/config.yaml
 ```
 
-### Gotcha 3: the 32-char cookie secret
+### Pitfall 3: the 32-char cookie secret
 
 `HEADPLANE_SERVER__COOKIE_SECRET` must be exactly 32 characters. Generate one
 with `openssl rand -base64 24` and strip to 32, or `tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 32`.
 
-### Gotcha 4: expiry is a footgun until you disable it
+### Pitfall 4: expiry is a footgun until you disable it
 
 Default `node.expiry` is 180 days. When I looked, my three *newest* nodes
-(the ones I cared about most) had expiry timestamps; my three oldest had none.
+(the ones I cared about most) had expiry dates set; my three oldest had none.
 If a device's key expires, it silently falls off the mesh and re-auths with a
 banner you might not notice. For a personal network:
 
@@ -463,7 +468,7 @@ docker exec headscale headscale nodes expire -d -i <node-id>
 Tradeoff to accept: nothing expires anymore, so a lost/stolen device has no
 safety net — delete it manually when it's gone.
 
-### Gotcha 5: AdGuard Home as tailnet DNS
+### Pitfall 5: AdGuard Home as tailnet DNS
 
 If your nameserver is a container on the tailnet, it must be reachable from
 clients (and allowed by ACLs). I bind AdGuard to my VPS node's tailnet IP

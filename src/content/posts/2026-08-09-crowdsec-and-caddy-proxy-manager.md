@@ -9,13 +9,18 @@ tags: [caddy, crowdsec, reverseproxy, selfhosting, waf, security]
 > (see [your first VPS](/posts/2026-08-29-your-first-vps-a-safe-baseline) for
 > the floor). Swap `debnerd.in` for your own domain. The CrowdSec part is
 > native (systemd), not a container.
+>
+> **Update (Sep 2026):** this post describes my old stack (DigitalOcean VPS,
+> plain Caddy, headscale mesh). Today it's Azure + Pangolin/Traefik + Tailscale
+> cloud with CrowdSec 1.8.1 — same ideas, different plumbing. The pitfalls below
+> still apply to any Caddy-based build.
 
 ## Why I moved past proxy UIs
 
 I run several public services on my 2GB DigitalOcean VPS: SearXNG, Vaultwarden, IT-Tools, Headscale, Forgejo, and their admin consoles. Each needs HTTPS on port 443, and only one service can bind that port. This led me through several reverse proxies:
 
 1. **Pangolin** (Traefik-based) — feature-rich but overly complex for my needs
-2. **Nginx Proxy Manager Plus** — solid but limited by Nginx's configuration model  
+2. **Nginx Proxy Manager Plus** — solid but limited by Nginx's configuration model
 3. **Caddy Proxy Manager** (CPM) — Caddy with a web UI, but I ran 5+ containers for features I didn't use
 4. **Plain Caddy** — where I landed. One container, full control via Caddyfile, DNS-01 certificates via Cloudflare
 
